@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/inancgumus/screen"
 	"os"
@@ -11,8 +12,8 @@ import (
 )
 
 type Task struct {
-	Title  string
-	isDone bool
+	Title  string `json:"Title"`
+	IsDone bool   `json:"IsDone"`
 }
 
 var tasks []Task
@@ -28,13 +29,30 @@ func (t ByTitle) Less(i, j int) bool { return t.Tasks[i].Title < t.Tasks[j].Titl
 
 type ByStatus struct{ Tasks }
 
-func (t ByStatus) Less(i, j int) bool { return t.Tasks[i].isDone }
+func (t ByStatus) Less(i, j int) bool { return t.Tasks[i].IsDone }
 
 func main() {
 
-	tasks = append(tasks, Task{"Проснуться", true})
-	tasks = append(tasks, Task{"Поесть", true})
-	tasks = append(tasks, Task{"Поспать", false})
+	if _, err := os.Stat("tasks.json"); os.IsNotExist(err) {
+		j, err := json.Marshal(tasks)
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = os.WriteFile("tasks.json", j, 0644)
+		if err != nil {
+			fmt.Println("")
+		}
+	}
+
+	data, err := os.ReadFile("tasks.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = json.Unmarshal(data, &tasks)
+
+	//tasks = append(tasks, Task{"Проснуться", true})
+	//tasks = append(tasks, Task{"Поесть", true})
+	//tasks = append(tasks, Task{"Поспать", false})
 
 	for {
 		screen.Clear()
@@ -83,7 +101,7 @@ func main() {
 			screen.MoveTopLeft()
 			num := NumTask()
 			if num > 0 && num <= len(tasks) {
-				tasks = DeleteTask(NumTask(), tasks)
+				tasks = DeleteTask(num, tasks)
 			} else {
 				fmt.Println("Неверный ввод номера задачи")
 			}
@@ -92,7 +110,7 @@ func main() {
 			screen.MoveTopLeft()
 			num := NumTask()
 			if num > 0 && num <= len(tasks) {
-				tasks = ChangeTask(NumTask(), TitleTask(), tasks)
+				tasks = ChangeTask(num, TitleTask(), tasks)
 			} else {
 				fmt.Println("Неверный ввод номера задачи")
 			}
@@ -133,8 +151,16 @@ func main() {
 				fmt.Println("Неверный выбор. Попробуйте снова.")
 			}
 		case 7:
-			fmt.Print("Выход")
+			j, err := json.Marshal(tasks)
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = os.WriteFile("tasks.json", j, 0644)
+			if err != nil {
+				fmt.Println("")
+			}
 			return
+		case 8:
 		default:
 			screen.Clear()
 			screen.MoveTopLeft()
@@ -144,7 +170,7 @@ func main() {
 }
 
 func NewTask(title string, tasks []Task) []Task {
-	tasks = append(tasks, Task{Title: title, isDone: false})
+	tasks = append(tasks, Task{Title: title, IsDone: false})
 	listTasks(tasks)
 	return tasks
 }
@@ -183,7 +209,7 @@ func TitleTask() string {
 func listTasks(tasks []Task) {
 	for i, task := range tasks {
 		status := "Не выполнено"
-		if task.isDone != false {
+		if task.IsDone != false {
 			status = "Выполнено"
 		}
 		fmt.Println(i+1, task.Title, status)
@@ -193,7 +219,7 @@ func listTasks(tasks []Task) {
 }
 
 func SwitchTaskDone(NumTask int, tasks []Task) []Task {
-	tasks[NumTask-1].isDone = !tasks[NumTask-1].isDone
+	tasks[NumTask-1].IsDone = !tasks[NumTask-1].IsDone
 	listTasks(tasks)
 	return tasks
 }

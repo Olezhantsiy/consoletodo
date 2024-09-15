@@ -36,12 +36,10 @@ func TitleTask() string {
 	title, err := bufio.NewReader(os.Stdin).ReadString('\n')
 	if err != nil {
 		fmt.Println("Ошибка при вводе названия", err)
-		return "0"
 	}
 	title = strings.TrimSpace(title)
 	if len(title) == 0 {
 		fmt.Println("Пустая строка...")
-		return "0"
 	}
 	return title
 }

@@ -147,7 +147,7 @@ func main() {
 				Usage: "Sort task by done",
 				Action: func(c *cli.Context) error {
 					sort.Sort(ByDone{tasks})
-					fmt.Println("Задачи отсортирорваны по названию")
+					fmt.Println("Задачи отсортирорваны по выполнению")
 					return nil
 				},
 			},

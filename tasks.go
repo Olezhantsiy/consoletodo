@@ -11,7 +11,7 @@ import (
 
 func NewTask(title string, tasks []Task) []Task {
 	tasks = append(tasks, Task{Title: title, IsDone: false})
-	listTasks(tasks)
+	fmt.Printf("Задача \"%s\" добавлена", title)
 	return tasks
 }
 
@@ -47,6 +47,10 @@ func TitleTask() string {
 }
 
 func listTasks(tasks []Task) {
+	if len(tasks) < 1 {
+		fmt.Println("Задач нет")
+		return
+	}
 	for i, task := range tasks {
 		done := "Не выполнено"
 		if task.IsDone != false {
